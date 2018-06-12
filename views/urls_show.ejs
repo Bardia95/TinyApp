@@ -2,17 +2,8 @@
 <html lang="en">
 <%- include('./partials/_header') %>
 <body>
-<table summary="URL &amp; its short form">
-    <tr>
-      <th>URL</th>
-      <th>Shortform</th>
-    </tr>
-    <tr>
-      <td><%= longURL %></td>
-      <td><%= shortURL %></td>
-    </tr>
-  </table>
-  <form action="/urls/<%= shortURL %>" method="POST" style="margin:150px;">
+  <p><strong><%= longURL %>:</strong><%= shortURL %></p>
+  <form action="/urls/<%= shortURL %>" method="POST">
     <label for="longURL">New URL:</label>
     <input id="longURL" type="text" name="longURL" placeholder="http://" style="width: 300px">
     <input type="submit" value="Submit">
