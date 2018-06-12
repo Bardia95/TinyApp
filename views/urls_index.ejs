@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('./partials/_header') %>
+<body>
+   <table summary="URLs &amp; their short form">
+    <tr>
+      <th>URL</th>
+      <th>Shortform</th>
+    </tr>
+    <% for (let url in urls) { %>
+    <tr>
+      <td><%= urls[url] %></td>
+      <td><%= url %></td>
+      <td>
+        <form method="POST" action="/urls/<%= url %>/delete">
+          <input id="delete" type="submit" value="Delete" name="delete">
+        </form>
+      </td>
+    </tr>
+    <% } %>
+  </table>
+  <a href="#">Shorten URL</a>
+</body>
+</html>
