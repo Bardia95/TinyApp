@@ -1,27 +1,16 @@
-<head>
-  <title>TinyApp</title>
-</head>
-
 <div>
-  <h1>TinyApp</h1>
   <p>
-    <% if (username) { -%>
-    <strong>Login</strong>
-    <form action="/login" method="POST">
-      <input id="username" type="text" name="username">
-      <input type="submit" value="Submit">
-    </form>
-    <strong><%= username%></strong>
-    <% } else { -%>
-     <strong>Logout</strong>
-     <form action="/logout" method="POST">
-      <input id="username" type="text" name="username">
-      <input type="submit" value="Submit">
-    </form>
-    <strong><%= username%></strong>
-    <% } -%>
-
+  <% if (!user) { %>
+  <form method="GET" action="/login">
+    <input type="submit" value="Login" name="login">
+  </form>
+  <form method="GET" action="/register">
+    <input type="submit" value="Register" name="register">
+  </form>
+  <% } else { %>
+  <form method="POST" action="/logout">
+    <input type="submit" value="Logout" name="logout">
+  </form>
   </p>
-
-
+  <%}%>
 </div>

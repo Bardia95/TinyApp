@@ -1,7 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<%- include('./partials/_header') %>
-<body>
+<% include partials/_head %>
+<% include partials/_header %>
   <p><strong><%= longURL %>:</strong><%= shortURL %></p>
   <form action="/urls/<%= shortURL %>" method="POST">
     <label for="longURL">New URL:</label>
