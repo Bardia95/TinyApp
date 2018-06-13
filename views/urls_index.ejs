@@ -1,23 +1,32 @@
   <% include partials/_head %>
   <% include partials/_header %>
-
-   <table summary="URLs &amp; their short form">
-    <tr>
-      <th>URL</th>
-      <th>Shortform</th>
-    </tr>
-    <% for (let url in urls) { %>
-    <tr>
-      <td><%= urls[url] %></td>
-      <td><%= url %></td>
-      <td>
-        <form method="POST" action="/urls<%= url %>/delete">
-          <input id="delete" type="submit" value="Delete" name="delete">
-        </form>
-      </td>
-    </tr>
-    <% } %>
+    <% if (user) {%>
+      <% for (let url in urls) { %>
+        <table summary="URLs &amp; their short form">
+          <tr>
+            <th>URL</th>
+            <th>Shortform</th>
+          </tr>
+          <form method="GET" action="/urls/new">
+            <input id="new" type="submit" value="New URL" name="new">
+          </form>
+          <tr>
+            <td><%= urls[url] %></td>
+            <td><%= url %></td>
+            <td>
+              <form method="POST" action="/urls/<%= url %>/delete">
+                <input id="delete" type="submit" value="Delete" name="delete">
+              </form>
+              <form method="GET" action="/urls/<%= url %>">
+                <input id="edit" type="submit" value="Edit" name="edit">
+              </form>
+            </td>
+        </tr>
+      <%} } else { %>
+        <tr>
+          <td>Please log in!</td>
+        </tr>
+      <% } %>
   </table>
-  <a href="#">Shorten URL</a>
 </body>
 </html>

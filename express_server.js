@@ -11,15 +11,20 @@ app.set("view engine", "ejs");
 
 
 const userList = {
+
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: "purple-monkey-dinosaur",
+    urlList: { "b2xVn2": "http://www.lighthouselabs.ca"}
   },
+
+
  "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: "dishwasher-funk",
+    urlList: {}
   }
 }
 
@@ -27,6 +32,10 @@ var urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
 };
+
+function urlsForUser(id) {
+  return userList[id]["urlList"];
+}
 
 function generateRandomString() {
     var chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -45,22 +54,31 @@ app.get("/", (req, res) => {
 
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase,
+                       users: userList,
                        user: undefined};
   if (req.cookies['user_id']) {
     templateVars.user = userList[req.cookies['user_id']];
+    templateVars.urls = urlsForUser(req.cookies['user_id']);
+    console.log(templateVars.urls);
   }
   res.render("urls_index", templateVars);
 });
 
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
+  userList[req.cookies['user_id']].urlList = {
+    shortURL: req.body.longURL
+  }
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`/urls`);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id];
-  res.redirect(`/urls`);
+
+  if (req.cookies['user_id'] && userList[req.cookies['user_id']].urlList.hasOwnProperty(req.params.id)) {
+    delete urlDatabase[req.params.id];
+    res.redirect(`/urls`);
+  }
 });
 
 app.get("/urls/new", (req, res) => {
@@ -68,7 +86,7 @@ app.get("/urls/new", (req, res) => {
     user: undefined
   };
   if (req.cookies['user_id']) {
-    templateVars.user = userList[req.cookies['user_id']]
+    templateVars.user = userList[req.cookies['user_id']];
     res.render("urls_new", templateVars);
   }
   res.redirect('/login');
@@ -86,8 +104,10 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.post("/urls/:id", (req, res) => {
-  urlDatabase[req.params.id] = req.body.longURL;
-  res.redirect("/urls");
+  if (req.cookies['user_id'] && userList[req.cookies['user_id']].urlList.hasOwnProperty(req.params.id)) {
+    urlDatabase[req.params.id] = req.body.longURL;
+    res.redirect("/urls");
+  };
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -108,23 +128,20 @@ app.get("/login", (req, res) => {
 app.post("/register", (req, res) => {
   let templateVars = { users: userList}
   let emailArray = [];
-  for (let user in userList) {
-    emailArray.push(userList[user].email);
-  }
-  if (req.body.email && req.body.password && !emailArray.includes(req.body.email)) {
+  if (req.body.email && req.body.password && req.body.email != userList[user].email) {
     let userID = generateRandomString();
     userList[userID] = {
       id: userID,
       email: req.body.email,
-      password: req.body.password
+      password: req.body.password,
+      urlList: {}
     }
     res.cookie('user_id', userList[userID].id);
-    loggedIn = true;
     res.redirect('/urls');
   } else if (emailArray.includes(req.body.email)) {
-    res.status(400).send("There is already an account with this email");
+    res.status(400).send("400 There is already an account with this email");
     } else {
-    res.status(400).send("Email and Password need to be filled");
+    res.status(400).send("400 Email and Password need to be filled");
   }
 
 
@@ -136,20 +153,18 @@ app.post("/login", (req, res) => {
     if (userList[user].email === req.body.email) {
       if (userList[user].password === req.body.password) {
         res.cookie('user_id', userList[user].id);
-        loggedIn = true;
         res.redirect('/urls');
     } else {
-      res.status(403).send("Password is incorrect")
+      res.status(403).send("403 Password is incorrect")
     }
   } else {
-    res.status(403).send("Email not found");
+    res.status(403).send("403 Email not found");
   }
   }
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie('user_id');
-  loggedIn = false;
   res.redirect('/urls');
 })
 
