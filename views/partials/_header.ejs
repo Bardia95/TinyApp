@@ -1,16 +1,26 @@
-<div>
-  <p>
-  <% if (!user) { %>
-  <form method="GET" action="/login">
-    <input type="submit" value="Login" name="login">
-  </form>
-  <form method="GET" action="/register">
-    <input type="submit" value="Register" name="register">
-  </form>
-  <% } else { %>
-  <form method="POST" action="/logout">
-    <input type="submit" value="Logout" name="logout">
-  </form>
-  </p>
-  <%}%>
-</div>
+<nav>
+  <div class="nav-wrapper">
+    <a href="#" class="brand-logo center">TinyApp</a>
+    <ul id="nav-mobile" class="right hide-on-med-and-down">
+      <% if (!user) { %>
+        <li>
+        <form method="GET" action="/login">
+          <input type="submit" value="Login" name="login" class="waves-effect waves-light btn">
+        </form>
+        </li>
+        <li>
+        <form method="GET" action="/register">
+          <input type="submit" value="Register" name="register" class="waves-effect waves-light btn">
+        </form>
+        </li>
+      <% } else { %>
+      </li>
+        <form method="POST" action="/logout">
+          <input type="submit" value="Logout" name="logout" class="waves-effect waves-light btn">
+        </form>
+        </li>
+      <%}%>
+    </ul>
+  </div>
+</nav>
+

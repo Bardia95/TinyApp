@@ -1,31 +1,35 @@
-  <% include partials/_head %>
-  <% include partials/_header %>
-    <% if (user) {%>
-      <form method="GET" action="/urls/new">
-        <input id="new" type="submit" value="New URL" name="new">
-      </form>
-      <% for (let url in urls) { %>
-        <table summary="URLs &amp; their short form">
-          <tr>
-            <th>URL</th>
-            <th>Shortform</th>
-          </tr>
-
-          <tr>
-            <td><%= urls[url] %></td>
-            <td><%= url %></td>
-            <td>
-              <form method="POST" action="/urls/<%= url %>/delete">
-                <input id="delete" type="submit" value="Delete" name="delete">
-              </form>
-              <form method="GET" action="/urls/<%= url %>">
-                <input id="edit" type="submit" value="Edit" name="edit">
-              </form>
-            </td>
+<% include partials/_head %>
+<% include partials/_header %>
+<% if (user) {%>
+  <form method="GET" action="/urls/new" class="center" style="padding: 50px">
+    <input id="new" type="submit" value="New URL" name="new" class="waves-effect waves-light btn-small center">
+  </form>
+  <% for (let url in urls) { %>
+    <table summary="URLs &amp; their short form" class="centered">
+      <thead>
+        <tr>
+          <th>URL</th>
+          <th>Shortform</th>
         </tr>
-      </table>
-      <%} } else { %>
-        <p>Please log in!</p>
-      <% } %>
-</body>
-</html>
+      </thead>
+      <tbody>
+        <tr>
+          <td><%= urls[url] %></td>
+          <td><%= url %></td>
+          <td>
+            <form method="POST" action="/urls/<%= url %>/delete/?_method=DELETE">
+              <input id="delete" type="submit" value="Delete" name="delete" class="waves-effect waves-light btn-small">
+            </form>
+          </td>
+          <td>
+            <form method="GET" action="/urls/<%= url %>">
+              <input id="edit" type="submit" value="Edit" name="edit" class="waves-effect waves-light btn-small">
+            </form>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  <%} } else { %>
+    <p>Please log in!</p>
+  <% } %>
+<% include partials/_footer %>

@@ -1,10 +1,28 @@
 <% include partials/_head %>
 <% include partials/_header %>
-  <p><strong><%= longURL %>:</strong><%= shortURL %></p>
-  <form action="/urls/<%= shortURL %>" method="POST">
-    <label for="longURL">New URL:</label>
-    <input id="longURL" type="text" name="longURL" placeholder="http://" style="width: 300px">
-    <input type="submit" value="Submit">
-  </form>
-</body>
-</html>
+<p class="center" style="font-size:30px"><strong><%= longURL %>: </strong><%= shortURL %></p>
+<div class="row">
+  <div class="col s12 m12 l12">
+    <div class="card-panel">
+      <div class="row">
+      <form class="col s12" action="/urls/<%= shortURL %>?_method=PUT" method="POST">
+        <h4 class="header2">Change URL</h4>
+        <div class="row">
+          <div class="input-field col s4">
+            <i class="mdi-action-account-circle prefix"></i>
+            <input id="icon_prefix" id="longURL", type="text", name="longURL" class="validate" style="width: 300px">
+            <label for="icon_prefix" class=""></label>
+          </div>
+          <div class="input-field col s4">
+            <div class="input-field col s12">
+              <input class="btn cyan waves-effect waves-light" type="submit" name="action" value="Submit"><i class="mdi-action-lock-open"></i>
+            </div>
+          </div>
+        </div>
+      </form>
+      </div>
+    </div>
+  </div>
+</div>
+<% include partials/_footer %>
+
