@@ -1,15 +1,16 @@
   <% include partials/_head %>
   <% include partials/_header %>
     <% if (user) {%>
+      <form method="GET" action="/urls/new">
+        <input id="new" type="submit" value="New URL" name="new">
+      </form>
       <% for (let url in urls) { %>
         <table summary="URLs &amp; their short form">
           <tr>
             <th>URL</th>
             <th>Shortform</th>
           </tr>
-          <form method="GET" action="/urls/new">
-            <input id="new" type="submit" value="New URL" name="new">
-          </form>
+
           <tr>
             <td><%= urls[url] %></td>
             <td><%= url %></td>
@@ -22,11 +23,9 @@
               </form>
             </td>
         </tr>
+      </table>
       <%} } else { %>
-        <tr>
-          <td>Please log in!</td>
-        </tr>
+        <p>Please log in!</p>
       <% } %>
-  </table>
 </body>
 </html>

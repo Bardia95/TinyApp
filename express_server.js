@@ -1,9 +1,10 @@
-var express = require("express");
-var cookieParser = require('cookie-parser')
-var app = express();
-var PORT = 8080; // default port 8080
-
+const express = require("express");
+const cookieParser = require('cookie-parser')
+const app = express();
+const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
+const bcrypt = require('bcrypt');
+
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
@@ -27,15 +28,15 @@ const userList = {
     urlList: {}
   }
 }
-
 var urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
 };
 
 function urlsForUser(id) {
-  return userList[id]["urlList"];
+  return userList[id].urlList;
 }
+
 
 function generateRandomString() {
     var chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -59,26 +60,32 @@ app.get("/urls", (req, res) => {
   if (req.cookies['user_id']) {
     templateVars.user = userList[req.cookies['user_id']];
     templateVars.urls = urlsForUser(req.cookies['user_id']);
-    console.log(templateVars.urls);
   }
   res.render("urls_index", templateVars);
 });
 
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
-  userList[req.cookies['user_id']].urlList = {
-    shortURL: req.body.longURL
-  }
+  userList[req.cookies['user_id']].urlList[shortURL] = req.body.longURL;
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`/urls`);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
-
-  if (req.cookies['user_id'] && userList[req.cookies['user_id']].urlList.hasOwnProperty(req.params.id)) {
+  if (req.cookies['user_id'] && userList[req.cookies['user_id']].urlList[req.params.id]) {
+    console.log("in if")
     delete urlDatabase[req.params.id];
+    delete userList[req.cookies['user_id']].urlList[req.params.id];
     res.redirect(`/urls`);
   }
+});
+
+app.post("/urls/:id", (req, res) => {
+  if (req.cookies['user_id'] && userList[req.cookies['user_id']].urlList.hasOwnProperty(req.params.id)) {
+    urlDatabase[req.params.id] = req.body.longURL;
+    userList[req.cookies['user_id']].urlList[req.params.id] = req.body.longURL;
+    res.redirect("/urls");
+  };
 });
 
 app.get("/urls/new", (req, res) => {
@@ -88,8 +95,9 @@ app.get("/urls/new", (req, res) => {
   if (req.cookies['user_id']) {
     templateVars.user = userList[req.cookies['user_id']];
     res.render("urls_new", templateVars);
+  } else {
+    res.redirect('/login');
   }
-  res.redirect('/login');
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -99,16 +107,13 @@ app.get("/urls/:id", (req, res) => {
                       };
   if (req.cookies['user_id']) {
     templateVars.user = userList[req.cookies['user_id']];
+    res.render("urls_show", templateVars);
+  } else {
+    res.redirect('/urls');
   }
-  res.render("urls_show", templateVars);
 });
 
-app.post("/urls/:id", (req, res) => {
-  if (req.cookies['user_id'] && userList[req.cookies['user_id']].urlList.hasOwnProperty(req.params.id)) {
-    urlDatabase[req.params.id] = req.body.longURL;
-    res.redirect("/urls");
-  };
-});
+
 
 app.get("/u/:shortURL", (req, res) => {
   let longURL = urlDatabase[req.params.shortURL];
@@ -128,12 +133,16 @@ app.get("/login", (req, res) => {
 app.post("/register", (req, res) => {
   let templateVars = { users: userList}
   let emailArray = [];
-  if (req.body.email && req.body.password && req.body.email != userList[user].email) {
+  let found = false;
+  for (let user in userList) {
+    found = (req.body.email === userList[user].email)
+  }
+  if (req.body.email && req.body.password && !found) {
     let userID = generateRandomString();
     userList[userID] = {
       id: userID,
       email: req.body.email,
-      password: req.body.password,
+      password: bcrypt.hashSync(req.body.password, 10),
       urlList: {}
     }
     res.cookie('user_id', userList[userID].id);
@@ -142,26 +151,30 @@ app.post("/register", (req, res) => {
     res.status(400).send("400 There is already an account with this email");
     } else {
     res.status(400).send("400 Email and Password need to be filled");
-  }
-
-
-})
+    }
+  })
 
 app.post("/login", (req, res) => {
   let templateVars = { users: userList}
+  let match = false;
+  let found = false;
   for (let user in userList) {
-    if (userList[user].email === req.body.email) {
-      if (userList[user].password === req.body.password) {
-        res.cookie('user_id', userList[user].id);
-        res.redirect('/urls');
+    if (req.body.email === userList[user].email) {
+      found = userList[user];
+    }
+    match = (bcrypt.compareSync(req.body.password, userList[user].password));
+  }
+  if (found) {
+    if (match) {
+      res.cookie('user_id', found.id);
+      res.redirect('/urls');
     } else {
       res.status(403).send("403 Password is incorrect")
     }
   } else {
     res.status(403).send("403 Email not found");
-  }
-  }
-});
+    }
+  });
 
 app.post("/logout", (req, res) => {
   res.clearCookie('user_id');
