@@ -4,9 +4,8 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-!["Screenshot of URLs page"](https://github.com/lighthouse-labs/tinyapp/blob/master/docs/urls-page.png)
-!["Screenshot of login page"](https://github.com/lighthouse-labs/tinyapp/blob/master/docs/register-page.png)
-That will have added the screenshots to your README file.
+!["Screenshot of URLs page"](https://github.com/Bardia95/TinyApp/blob/master/docs/urls-page.png)
+!["Screenshot of login page"](https://github.com/Bardia95/TinyApp/blob/master/docs/login-page.png)
 
 ## Dependencies
 
