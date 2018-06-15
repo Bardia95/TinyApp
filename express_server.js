@@ -48,7 +48,6 @@ const userList = {
 }
 
 // URL database
-
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
@@ -120,7 +119,7 @@ app.post("/urls", (req, res) => {
     // Creating a key(short URL)-value(long URL) pair in URL database
     urlDatabase[shortURL] = req.body.longURL;
     // Redirect to URLs index
-    res.redirect(`/urls/${shortURL}`);
+    res.redirect(`/urls`);
   } else {
     res.status(403).send("403 Need to be logged in");
   }
