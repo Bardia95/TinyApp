@@ -2,7 +2,7 @@
 <% include partials/_header %>
 <% if (user) {%>
   <form method="GET" action="/urls/new" class="center" style="padding: 50px">
-    <input id="new" type="submit" value="New URL" name="new" class="waves-effect waves-light btn-small center">
+    <input id="new" type="submit" value="New URL" name="new" class="waves-effect waves-light btn center">
   </form>
   <% for (let url in urls) { %>
     <table summary="URLs &amp; their short form" class="centered">
@@ -10,21 +10,23 @@
         <tr>
           <th>URL</th>
           <th>Shortform</th>
+          <th>Edit</th>
+          <th>Delete</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td><%= urls[url] %></td>
-          <td><%= url %></td>
-          <td>
-            <form method="POST" action="/urls/<%= url %>/delete/?_method=DELETE">
-              <input id="delete" type="submit" value="Delete" name="delete" class="waves-effect waves-light btn-small">
-            </form>
-          </td>
+          <td>  <a href="/u/<%= url %>%>"><%= url %></a></td>
           <td>
             <form method="GET" action="/urls/<%= url %>">
-              <input id="edit" type="submit" value="Edit" name="edit" class="waves-effect waves-light btn-small">
+              <input id="edit" type="submit" value="Edit" name="edit" class="waves-effect waves-light yellow darken-2 btn-small">
             </form>
+            <td>
+            <form method="POST" action="/urls/<%= url %>/delete/?_method=DELETE">
+              <input id="delete" type="submit" value="Delete" name="delete" class="waves-effect waves-light red darken-4 btn-small">
+            </form>
+          </td>
           </td>
         </tr>
       </tbody>

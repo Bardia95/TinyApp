@@ -76,7 +76,13 @@ function generateRandomString() {
 
 // Redirect root route to URLs page if logged in or Log In page if not
 app.get("/", (req, res) => {
+  // Create template variables pointing to url database and user databse,
+  // and create user template variable
+  let templateVars = { urls: urlDatabase,
+                       users: userList,
+                       user: undefined};
   if (req.session.user_ID) {
+    templateVars.user = userList[req.session.user_id];
     res.redirect('/urls');
   } else {
     res.redirect('/login');
@@ -85,8 +91,6 @@ app.get("/", (req, res) => {
 
 // View urls route
 app.get("/urls", (req, res) => {
-  // Create template variables pointing to url database and user databse,
-  // and create user template variable
   let templateVars = { urls: urlDatabase,
                        users: userList,
                        user: undefined};
@@ -97,54 +101,74 @@ app.get("/urls", (req, res) => {
     templateVars.urls = urlsForUser(req.session.user_id);
     res.render("urls_index", templateVars);
   } else {
-    res.redirect('/login');
+    res.status(403).send("403 Need to be logged in");
   }
 });
 
 // Creating a new short URL when a long URL is submitted
 app.post("/urls", (req, res) => {
-  // Setting short URL to a random 6 digit alphanumeric string
-  let shortURL = generateRandomString();
-  // Creating a key(short URL)-value(long URL) pair in user's URL list
-  userList[req.session.user_id].urlList[shortURL] = req.body.longURL;
-  // Creating a key(short URL)-value(long URL) pair in URL database
-  urlDatabase[shortURL] = req.body.longURL;
-  // Redirect to URLs index
-  res.redirect(`/urls`);
+    let templateVars = { urls: urlDatabase,
+                       users: userList,
+                       user: undefined};
+  // If user is logged in
+  if (req.session.user_id) {
+    templateVars.user = userList[req.session.user_id];
+    // Setting short URL to a random 6 digit alphanumeric string
+    let shortURL = generateRandomString();
+    // Creating a key(short URL)-value(long URL) pair in user's URL list
+    userList[req.session.user_id].urlList[shortURL] = req.body.longURL;
+    // Creating a key(short URL)-value(long URL) pair in URL database
+    urlDatabase[shortURL] = req.body.longURL;
+    // Redirect to URLs index
+    res.redirect(`/urls/${shortURL}`);
+  } else {
+    res.status(403).send("403 Need to be logged in");
+  }
 });
 
 // Deleting a URL
 app.delete("/urls/:id/delete", (req, res) => {
+    let templateVars = { urls: urlDatabase,
+                       users: userList,
+                       user: undefined};
   // Validating user is signed in and was the creator of the URL they are trying to delete
   if (req.session.user_id && userList[req.session.user_id].urlList[req.params.id]) {
+    templateVars.user = userList[req.session.user_id];
     // Delete URL key-value pair in the URL database
     delete urlDatabase[req.params.id];
     // Delete URL key-value pair in the user's URL list
     delete userList[req.session.user_id].urlList[req.params.id];
     // Redirect to URLs index
     res.redirect(`/urls`);
+  } else if (!req.session.user_id) {
+    res.status(403).send("403 Need to be logged in");
   }
 });
 
 // Editing a URL
 app.put("/urls/:id", (req, res) => {
+  let templateVars = { urls: urlDatabase,
+                       users: userList,
+                       user: undefined};
   // Validating user is signed in and was the creator of the URL they are trying to update
   if (req.session.user_id && userList[req.session.user_id].urlList.hasOwnProperty(req.params.id)) {
+    templateVars.user = userList[req.session.user_id];
     // Update URL key-value pair in the URL database
     urlDatabase[req.params.id] = req.body.longURL;
     // Update URL key-value pair in the user's URL list
     userList[req.session.user_id].urlList[req.params.id] = req.body.longURL;
     // Redirect to URLs index
     res.redirect("/urls");
-  };
+  } else if (!req.session.user_id) {
+    res.status(403).send("403 Need to be logged in");
+  }
 });
 
 // View 'new URL' page
 app.get("/urls/new", (req, res) => {
-  // Create template variable for user
-  let templateVars = {
-    user: undefined
-  };
+  let templateVars = { urls: urlDatabase,
+                       users: userList,
+                       user: undefined};
   // If user is logged in
   if (req.session.user_id) {
     // Set user template variable to  logged in user
@@ -170,29 +194,43 @@ app.get("/urls/:id", (req, res) => {
     // Set user template variable to logged in user
     templateVars.user = userList[req.session.user_id];
     // Render URL page
-    res.render("urls_show", templateVars);
+    if (userList[req.session.user_id].urlList[req.params.id]) {
+      res.render("urls_show", templateVars);
+    } else {
+      res.status(403).send("403 Not your link");
+    }
   } else {
     // If correct user not logged in, show URLs page
-    res.redirect('/urls');
+    res.status(403).send("403 Need to be logged in");
   }
 });
 
+
+
 // Go to website from short URL
-app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL];
-  res.redirect(longURL);
+app.get("/u/:shorty", (req, res) => {
+    let longURL = urlDatabase[req.params.shorty];
+    res.redirect(longURL);
 });
 
-// Show register page
+  // If logged in redirect to URLs index otherwise show register page
 app.get("/register", (req, res) => {
-  let templateVars = { users: userList};
-  res.render('registration', templateVars);
+  if (req.session.user_id) {
+    res.redirect('/urls')
+  } else {
+    let templateVars = { users: userList};
+    res.render('registration', templateVars);
+  }
 })
 
-// Show login page
+  // If logged in redirect to URLs index otherwise show login page
 app.get("/login", (req, res) => {
-  let templateVars = { users: userList};
-  res.render('login', templateVars);
+  if (req.session.user_id) {
+    res.redirect('/urls')
+  } else {
+    let templateVars = { users: userList};
+    res.render('login', templateVars);
+  }
 })
 
 // Receive register form
@@ -253,7 +291,7 @@ app.post("/logout", (req, res) => {
   // Delete cookie session
   req.session = null;
   // Redirect to root
-  res.redirect('/urls');
+  res.redirect('/');
 })
 
 // Starting server
