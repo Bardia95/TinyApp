@@ -275,7 +275,7 @@ app.post("/login", (req, res) => {
   // If email is found and password matches, log user in
   if (found) {
     if (match) {
-      res.session.user_id = found.id;
+      req.session.user_id = found.id;
       res.redirect('/urls');
     } else {
       res.status(403).send("403 Password is incorrect")
